@@ -20,4 +20,4 @@ EventPub.Publish("my.path",{anyprop:'anydata'})
 ```
 
 ## Events will be published all the way, for example:
-## If you published an event along the path "my.path.sub" then the publication will be along the path "my.path.sub" and along the path "my.path" and "my"
+### If you published an event along the path "my.path.sub" then the publication will be along the path "my.path.sub" and along the path "my.path" and "my"
