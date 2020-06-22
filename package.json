@@ -1,0 +1,26 @@
+{
+  "name": "pubsub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "email": "dev@reneos.com",
+    "name": "Viktor Abdulov"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/McRain/pubsub.git"
+  },
+  "keywords": [
+    "pubsub",
+    "event"
+  ],
+  "bugs": {
+    "url": "https://github.com/McRain/pubsub/issues"
+  },
+  "homepage": "https://github.com/McRain/pubsub#readme",
+  "description": ""
+}
