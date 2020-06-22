@@ -1,14 +1,11 @@
 {
-  "name": "pubsub",
+  "name": "@reneos/pubsub",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": {
-    "email": "dev@reneos.com",
-    "name": "Viktor Abdulov"
-  },
+  "author": "Viktor Abdulov <dev@reneos.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,5 +19,5 @@
     "url": "https://github.com/McRain/pubsub/issues"
   },
   "homepage": "https://github.com/McRain/pubsub#readme",
-  "description": ""
+  "description": "Pub/Sub broker"
 }
