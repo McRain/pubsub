@@ -1,6 +1,7 @@
 const _subscriptions = {}
 const _managers = {}
 const _paths = {}
+
 const _events = {};
 const _subs = (event, once, handler) => {
 	if (_events[event] == null)
@@ -32,8 +33,9 @@ module.exports = class EventPub {
 	 * @param {String} path 
 	 * @param {Function} handler
 	 * @param {String} key optional - unique subscription key
+	 * @param {String} networkId - no use this argument
 	 */
-	static Subscribe(path, handler, key) {
+	static Subscribe(path, handler, key,netId) {
 		if (typeof handler !== 'function')
 			throw new Error(`Handler must be function`)
 		let container = _managers
@@ -54,10 +56,15 @@ module.exports = class EventPub {
 		}
 		const k = key || Generate()
 		container[k] = {
-			handler
+			handler,
+			id:netId
 		}
 		EventPub.Emit("subscribe", path)
 		return k
+	}
+
+	static Sub(...args){
+		EventPub.Subscribe.apply(null,args)
 	}
 
 	/**
@@ -116,6 +123,7 @@ module.exports = class EventPub {
 			})
 			//------------------------------
 			let root = _subscriptions
+			const history=[]
 			for (let i = 0; i < paths.length; i++) {
 				const currPath = paths[i]
 				root = root[currPath]
@@ -124,7 +132,11 @@ module.exports = class EventPub {
 				Object.keys(root).forEach(k => {
 					try {
 						const child = root[k]
-						//if (typeof child.handler === 'function') {
+						if(child.id){
+							if(history.includes(child.id))
+								return
+							history.push(child.id)
+						}
 						if (child.handler) {
 							child.handler(data, path, eventId, eventDate, source)
 						}
