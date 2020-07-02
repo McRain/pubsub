@@ -1,6 +1,7 @@
 const _subscriptions = {}
 const _managers = {}
 const _paths = {}
+const _subslist = {}
 
 const _events = {};
 const _subs = (event, once, handler) => {
@@ -22,6 +23,9 @@ function Generate(cnt = 24) {
  */
 module.exports = class EventPub {
 
+	static get Subs() {
+		return _subslist
+	}
 	static get Paths() {
 		return _paths
 	}
@@ -35,7 +39,7 @@ module.exports = class EventPub {
 	 * @param {String} key optional - unique subscription key
 	 * @param {String} networkId - no use this argument
 	 */
-	static Subscribe(path, handler, key,netId) {
+	static Subscribe(path, handler, key, netId) {
 		if (typeof handler !== 'function')
 			throw new Error(`Handler must be function`)
 		let container = _managers
@@ -57,14 +61,15 @@ module.exports = class EventPub {
 		const k = key || Generate()
 		container[k] = {
 			handler,
-			id:netId
+			id: netId
 		}
-		EventPub.Emit("subscribe", path)
+		_subslist[path] = k
+		EventPub.Emit("subscribe", path, k)
 		return k
 	}
 
-	static Sub(...args){
-		EventPub.Subscribe.apply(null,args)
+	static Sub(...args) {
+		EventPub.Subscribe.apply(null, args)
 	}
 
 	/**
@@ -123,7 +128,7 @@ module.exports = class EventPub {
 			})
 			//------------------------------
 			let root = _subscriptions
-			const history=[]
+			const history = []
 			for (let i = 0; i < paths.length; i++) {
 				const currPath = paths[i]
 				root = root[currPath]
@@ -132,8 +137,8 @@ module.exports = class EventPub {
 				Object.keys(root).forEach(k => {
 					try {
 						const child = root[k]
-						if(child.id){
-							if(history.includes(child.id))
+						if (child.id) {
+							if (history.includes(child.id))
 								return
 							history.push(child.id)
 						}

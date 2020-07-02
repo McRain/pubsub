@@ -1,5 +1,7 @@
 ## pubsub
 
+##### This package is intended for messaging through a publication (shared bus). Channels have a tree structure and publishing in an inherited channel makes publishing in the parent channel.
+
 ```javascript
 const EventPub = require("@reneos/pubsub").EventPub
 ```
