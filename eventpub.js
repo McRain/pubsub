@@ -1,5 +1,5 @@
-const _subscriptions = {}
-const _managers = {}
+const _subscriptions = new Map()
+const _managers = new Map()
 const _paths = {}
 const _subslist = {}
 
@@ -48,10 +48,9 @@ module.exports = class EventPub {
 			const paths = path.split('.')
 			for (let i = 0; i < paths.length; i++) {
 				const p = paths[i]
-				if (!container[p]) {
-					container[p] = {}
-				}
-				container = container[p]
+				if (!container.has(p))
+					container.set(p, new Map())
+				container = container.get(p)
 			}
 			if (!_paths[path])
 				_paths[path] = 1
@@ -59,10 +58,10 @@ module.exports = class EventPub {
 				_paths[path]++
 		}
 		const k = key || Generate()
-		container[k] = {
+		container.set(k, {
 			handler,
 			id: netId
-		}
+		})
 		_subslist[path] = k
 		EventPub.Emit("subscribe", path, k)
 		return k
@@ -82,9 +81,9 @@ module.exports = class EventPub {
 		let container = _subscriptions
 		for (let i = 0; i < paths.length; i++) {
 			const p = paths[i]
-			if (!container[p])
+			if (!container.has(p))
 				continue
-			container = container[p]
+			container = container.get(p)
 		}
 		if (_paths[path]) {
 			_paths[path]--
@@ -92,8 +91,8 @@ module.exports = class EventPub {
 				delete _paths[path]
 		}
 		if (container) {
-			if (container[key])
-				delete container[key]
+			if (container.has(key))
+				container.delete(key)
 		} else if (_managers[key]) {
 			delete _managers[key]
 			return
@@ -110,7 +109,7 @@ module.exports = class EventPub {
 	 * @param {Number} eventDate timestamp (network)
 	 * @param {String} source Source (Network)
 	 */
-	static Publish(path, data, eventId, eventDate, source) {
+	static Publish(path, data, eventId, eventDate, source, target) {
 		if (path && (typeof path === "string" || Array.isArray(path))) {
 			if (!eventId) {
 				eventId = Generate()
@@ -119,34 +118,27 @@ module.exports = class EventPub {
 			const errors = []
 			const paths = Array.isArray(path) ? path : path.split('.')
 			//-------------------------------
-			Object.keys(_managers).forEach(m => {
-				try {
-					_managers[m].handler(data, path, eventId, eventDate, source)
-				} catch (e) {
-					errors.push({ key: m, error: e })
-				}
+			_managers.forEach((v, k) => {
+				v.handler(data, path, eventId, eventDate, source, target)
 			})
 			//------------------------------
 			let root = _subscriptions
 			const history = []
 			for (let i = 0; i < paths.length; i++) {
 				const currPath = paths[i]
-				root = root[currPath]
-				if (!root)
-					break
-				Object.keys(root).forEach(k => {
-					try {
-						const child = root[k]
-						if (child.id) {
-							if (history.includes(child.id))
+				if (!root.has(currPath))
+					continue
+				root = root.get(currPath)
+				root.forEach((v, k) => {
+					if (v.handler) {
+						if (target && target !== v.id)
+							return
+						if(v.id){
+							if(history.includes(v.id))
 								return
-							history.push(child.id)
-						}
-						if (child.handler) {
-							child.handler(data, path, eventId, eventDate, source)
-						}
-					} catch (e) {
-						errors.push({ key: k, error: e })
+							history.push(v.id)
+						}						
+						v.handler(data, path, eventId, eventDate, source, target)
 					}
 				})
 			}
