@@ -71,7 +71,7 @@ describe('Tests', () => {
                 done(key===k?null:"Erron unsub")
             })   
             EventPub.Unsubscribe(k)
-        });
+        })
         it('Event with no exist unsubscribe', (done) => {
             EventPub.On("unsubscribe",()=>{
                 done("Fail on unsubscribe")
@@ -80,7 +80,7 @@ describe('Tests', () => {
             })
             EventPub.Unsubscribe("NoExistKey")
             done()
-        });
+        })
     });
     describe('Server side', () => {
         it('Subscribe', (done) => {

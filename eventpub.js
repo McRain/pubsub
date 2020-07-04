@@ -51,6 +51,7 @@ module.exports = class EventPub {
 		if (typeof handler !== 'function')
 			throw new Error(`Handler must be function`)
 		let container = _managers
+		const k = key || Generate()
 		if (path.length > 0) {
 			container = _subscriptions
 			const paths = path.split('.')
@@ -64,13 +65,12 @@ module.exports = class EventPub {
 				_paths[path] = 1
 			else
 				_paths[path]++
-		}
-		const k = key || Generate()
+			_subslist[path] = k
+		}		
 		container.set(k, {
 			handler,
 			id: netId
 		})
-		_subslist[path] = k
 		EventPub.Emit("subscribe", path, k)
 		return k
 	}
