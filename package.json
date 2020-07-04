@@ -3,8 +3,11 @@
   "version": "1.0.4",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish":"npm publish --access public"
+    "test": "mocha --timeout 10000",
+    "publish": "npm publish --access public"
+  },
+  "devDependencies": {
+    "mocha": "8.0.1"
   },
   "author": "Viktor Abdulov <dev@reneos.com>",
   "license": "MIT",

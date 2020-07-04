@@ -1,9 +1,9 @@
 const _subscriptions = new Map()
 const _managers = new Map()
-const _paths = {}
-const _subslist = {}
+let _paths = {}
+let _subslist = {}
 
-const _events = {};
+let _events = {};
 const _subs = (event, once, handler) => {
 	if (_events[event] == null)
 		_events[event] = [];
@@ -28,6 +28,14 @@ module.exports = class EventPub {
 	}
 	static get Paths() {
 		return _paths
+	}
+
+	static Clean() {
+		_events = {}
+		_subscriptions.clear()
+		_managers.clear()
+		_paths = {}
+		_subslist = {}
 	}
 
 	//#region PubSub
@@ -90,14 +98,12 @@ module.exports = class EventPub {
 			if (_paths[path] === 0)
 				delete _paths[path]
 		}
-		if (container) {
-			if (container.has(key))
-				container.delete(key)
-		} else if (_managers[key]) {
-			delete _managers[key]
-			return
+		if (container && container.has(key)) {
+			container.delete(key)
+			EventPub.Emit("unsubscribe", path)
+		} else if (_managers.has(key)) {
+			_managers.delete(key)
 		}
-		EventPub.Emit("unsubscribe", path)
 	}
 
 	/**
@@ -109,7 +115,7 @@ module.exports = class EventPub {
 	 * @param {Number} eventDate timestamp (network)
 	 * @param {String} source Source (Network)
 	 */
-	static Publish(path, data, eventId, eventDate, source, target) {
+	static Publish(path, data, eventId, eventDate, source) {
 		if (path && (typeof path === "string" || Array.isArray(path))) {
 			if (!eventId) {
 				eventId = Generate()
@@ -119,7 +125,7 @@ module.exports = class EventPub {
 			const paths = Array.isArray(path) ? path : path.split('.')
 			//-------------------------------
 			_managers.forEach((v, k) => {
-				v.handler(data, path, eventId, eventDate, source, target)
+				v.handler(data, path, eventId, eventDate, source)
 			})
 			//------------------------------
 			let root = _subscriptions
@@ -131,14 +137,12 @@ module.exports = class EventPub {
 				root = root.get(currPath)
 				root.forEach((v, k) => {
 					if (v.handler) {
-						if (target && target !== v.id)
-							return
-						if(v.id){
-							if(history.includes(v.id))
+						if (v.id) {
+							if (history.includes(v.id))
 								return
 							history.push(v.id)
-						}						
-						v.handler(data, path, eventId, eventDate, source, target)
+						}
+						v.handler(data, path, eventId, eventDate, source)
 					}
 				})
 			}
