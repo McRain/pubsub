@@ -79,31 +79,32 @@ module.exports = class EventPub {
 		EventPub.Subscribe.apply(null, args)
 	}
 
+
+
 	/**
 	 * Unsubscribes from the channel by the specified key
 	 * @param {String} path 
 	 * @param {String} key 
 	 */
-	static Unsubscribe(path, key) {
-		const paths = path.split('.')
-		let container = _subscriptions
-		for (let i = 0; i < paths.length; i++) {
-			const p = paths[i]
-			if (!container.has(p))
-				continue
-			container = container.get(p)
+	static Unsubscribe(key) {
+		const f = (cont) => {
+			if (cont.has(key)) {
+				cont.delete(key)
+				return true
+			}
+			const values = Array.from(cont.values())
+			for (let i = 0; i < values.length; i++) {
+				const val = values[i]
+				if (val.size > 0)
+					if (f(val))
+						return true
+			}
+			return false
 		}
-		if (_paths[path]) {
-			_paths[path]--
-			if (_paths[path] === 0)
-				delete _paths[path]
-		}
-		if (container && container.has(key)) {
-			container.delete(key)
-			EventPub.Emit("unsubscribe", path)
-		} else if (_managers.has(key)) {
+		if (f(_subscriptions))
+			EventPub.Emit("unsubscribe", key)
+		else if (_managers.has(key))
 			_managers.delete(key)
-		}
 	}
 
 	/**

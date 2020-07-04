@@ -64,12 +64,13 @@ describe('Tests', () => {
             })
         });
         it('Event unsubscribe', (done) => {
-            EventPub.On("unsubscribe",()=>{
-                done()
-            })            
+                     
             const k = EventPub.Subscribe("demo.path.no",({value})=>{                
             })
-            EventPub.Unsubscribe("demo.path.no",k)
+            EventPub.On("unsubscribe",(key)=>{
+                done(key===k?null:"Erron unsub")
+            })   
+            EventPub.Unsubscribe(k)
         });
         it('Event with no exist unsubscribe', (done) => {
             EventPub.On("unsubscribe",()=>{
@@ -77,7 +78,7 @@ describe('Tests', () => {
             })            
             const k = EventPub.Subscribe("demo.path.no",({value})=>{                
             })
-            EventPub.Unsubscribe("demo.path",k)
+            EventPub.Unsubscribe("NoExistKey")
             done()
         });
     });
